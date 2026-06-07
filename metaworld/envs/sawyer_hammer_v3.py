@@ -101,8 +101,9 @@ class SawyerHammerEnvV3(SawyerXYZEnv):
     def _set_hammer_xyz(self, pos: npt.NDArray[Any]) -> None:
         qpos = self.data.qpos.flat.copy()
         qvel = self.data.qvel.flat.copy()
-        qpos[9:12] = pos.copy()
-        qvel[9:15] = 0
+        adr, dofadr = self._first_free_joint_adr()
+        qpos[adr : adr + 3] = pos.copy()
+        qvel[dofadr : dofadr + 6] = 0
         self.set_state(qpos, qvel)
 
     def reset_model(self) -> npt.NDArray[np.float64]:

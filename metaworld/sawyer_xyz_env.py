@@ -386,6 +386,13 @@ class SawyerXYZEnv(SawyerMocapBase, EzPickle):
         qvel[obj_dof_adr : obj_dof_adr + 6] = 0
         self.set_state(qpos, qvel)
 
+    def _first_free_joint_adr(self) -> tuple[int, int]:
+        """Returns (qpos_adr, dof_adr) of the first free joint in the model."""
+        for jid in range(self.model.njnt):
+            if self.model.jnt_type[jid] == mujoco.mjtJoint.mjJNT_FREE:
+                return int(self.model.jnt_qposadr[jid]), int(self.model.jnt_dofadr[jid])
+        raise RuntimeError("No free joint found in model.")
+
     def _get_site_pos(self, site_name: str) -> npt.NDArray[np.float64]:
         """Gets the position of a given site.
 
@@ -744,6 +751,8 @@ class SawyerXYZEnv(SawyerMocapBase, EzPickle):
             # No mocap body (non-Sawyer arm).  The real reset is handled by
             # _external_reset_hand once the controller is wired in; this path
             # is only reached during MT1.__init__ before the hook is injected.
+            # Call mj_forward so geom/site xmats are valid before _get_obs().
+            mujoco.mj_forward(self.model, self.data)
             self.init_tcp = self.tcp_center
             return
         mocap_id = self.model.body_mocapid[mocap_body_id]

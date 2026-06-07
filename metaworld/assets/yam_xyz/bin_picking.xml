@@ -1,0 +1,27 @@
+<mujoco>
+    <!-- YAM variant of sawyer_bin_picking.xml — auto-transformed: yam_xyz_base replaces xyz_base, actuator+weld blocks removed. -->
+    <include file="../scene/basic_scene.xml"/>
+    <include file="../objects/assets/bin_dependencies.xml"/>
+    <include file="../objects/assets/yam_xyz_base_dependencies.xml"/>
+
+    <worldbody>
+        <include file="../objects/assets/yam_xyz_base.xml"/>
+
+        <body name="obj" pos="-0.12 0.7 0.04">
+            <freejoint/>
+            <include file="../objects/assets/objA.xml"/>
+        </body>
+
+
+        <body name="bin_start" pos="-0.12 0.7 0">
+            <include file="../objects/assets/binA.xml"/>
+        </body>
+
+        <body name="bin_goal" pos="0.12 0.7 0">
+            <include file="../objects/assets/binB.xml"/>
+        </body>
+
+
+    </worldbody>
+
+</mujoco>

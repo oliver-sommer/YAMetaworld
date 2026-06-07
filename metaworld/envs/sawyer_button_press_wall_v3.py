@@ -100,8 +100,9 @@ class SawyerButtonPressWallEnvV3(SawyerXYZEnv):
     def _set_obj_xyz(self, pos: npt.NDArray[Any]) -> None:
         qpos = self.data.qpos.flat.copy()
         qvel = self.data.qvel.flat.copy()
-        qpos[9] = pos
-        qvel[9] = 0
+        adr = self.model.joint("btnbox_joint").qposadr
+        qpos[adr] = pos
+        qvel[self.model.joint("btnbox_joint").dofadr] = 0
         self.set_state(qpos, qvel)
 
     def reset_model(self) -> npt.NDArray[np.float64]:

@@ -105,10 +105,11 @@ class SawyerCoffeeButtonEnvV3(SawyerXYZEnv):
         return np.array([1.0, 0.0, 0.0, 0.0])
 
     def _set_obj_xyz(self, pos: npt.NDArray[Any]) -> None:
-        qpos = self.data.qpos.flatten()
-        qvel = self.data.qvel.flatten()
-        qpos[0:3] = pos.copy()
-        qvel[9:15] = 0
+        qpos = self.data.qpos.flat.copy()
+        qvel = self.data.qvel.flat.copy()
+        adr, dofadr = self._first_free_joint_adr()
+        qpos[adr : adr + 3] = pos.copy()
+        qvel[dofadr : dofadr + 6] = 0
         self.set_state(qpos, qvel)
 
     def reset_model(self) -> npt.NDArray[np.float64]:

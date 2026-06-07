@@ -103,8 +103,8 @@ class SawyerPegInsertionSideEnvV3(SawyerXYZEnv):
             obj_to_target,
             grasp_reward,
             in_place_reward,
-            collision_box_front,
-            ip_orig,
+            _collision_box_front,
+            _ip_orig,
         ) = self.compute_reward(action, obs)
         assert self.obj_init_pos is not None
         grasp_success = float(

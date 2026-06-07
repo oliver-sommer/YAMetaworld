@@ -1,0 +1,21 @@
+<mujoco>
+    <!-- YAM variant of sawyer_plate_slide_sideway.xml — auto-transformed: yam_xyz_base replaces xyz_base, actuator+weld blocks removed. -->
+    <include file="../scene/basic_scene.xml"/>
+    <include file="../objects/assets/puck_goal_dependencies.xml"/>
+    <include file="../objects/assets/yam_xyz_base_dependencies.xml"/>
+
+    <worldbody>
+        <include file="../objects/assets/yam_xyz_base.xml"/>
+
+        <body name="puck_channel" pos="0. 0.6 0.015">
+            <include file="../objects/assets/puck.xml"/>
+
+        </body>
+        <body name="puck_goal" euler="0 0 1.57" pos="-0.3 0.6 0">
+            <include file="../objects/assets/puck_goal.xml"/>
+        </body>
+        <site name="goal" pos="-.3 .6 0" size="0.015"
+              rgba="0.8 0 0 1"/>
+    </worldbody>
+
+</mujoco>

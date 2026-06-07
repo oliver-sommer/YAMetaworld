@@ -123,7 +123,7 @@ class SawyerPickPlaceWallEnvV3(SawyerXYZEnv):
             self.data.geom("objGeom").xmat.reshape(3, 3)
         ).as_quat()
 
-    def adjust_initObjPos(self, orig_init_pos):
+    def adjust_initObjPos(self, orig_init_pos):  # noqa: N802
         # This is to account for meshes for the geom and object are not aligned
         # If this is not done, the object could be initialized in an extreme position
         diff = self.get_body_com("obj")[:2] - self.data.geom("objGeom").xpos[:2]
@@ -279,11 +279,11 @@ class SawyerPickPlaceWallEnvV3(SawyerXYZEnv):
             if reachDist < 0.05:
                 reachRew = -reachDist + max(action[-1], 0) / 50
 
-            def pickCompletionCriteria():
+            def pick_completion_criteria():
                 tolerance = 0.01
                 return objPos[2] >= (heightTarget - tolerance)
 
-            self.pickCompleted = pickCompletionCriteria()
+            self.pickCompleted = pick_completion_criteria()
 
             objDropped = (
                 (objPos[2] < (self.objHeight + 0.005))

@@ -179,4 +179,4 @@ class SawyerReachEnvV3(SawyerXYZEnv):
             )
             reachRew = max(reachRew, 0)
             reward = reachRew
-            return float(reward), float(reachDist), float(0.0)
+            return float(reward), float(reachDist), 0.0

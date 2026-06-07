@@ -69,7 +69,7 @@ class SawyerPlateSlideBackEnvV3(SawyerXYZEnv):
         (
             reward,
             tcp_to_obj,
-            tcp_opened,
+            _tcp_opened,
             obj_to_target,
             object_grasped,
             in_place,
@@ -99,7 +99,12 @@ class SawyerPlateSlideBackEnvV3(SawyerXYZEnv):
     def _set_obj_xyz(self, pos: npt.NDArray[Any]) -> None:
         qpos = self.data.qpos.flat.copy()
         qvel = self.data.qvel.flat.copy()
-        qpos[9:11] = pos
+        adr_x = self.model.joint("goal_slidex").qposadr
+        adr_y = self.model.joint("goal_slidey").qposadr
+        qpos[adr_x] = pos[0]
+        qpos[adr_y] = pos[1]
+        qvel[self.model.joint("goal_slidex").dofadr] = 0
+        qvel[self.model.joint("goal_slidey").dofadr] = 0
         self.set_state(qpos, qvel)
 
     def reset_model(self) -> npt.NDArray[np.float64]:

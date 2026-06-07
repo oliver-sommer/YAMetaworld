@@ -1,0 +1,18 @@
+<mujoco>
+    <!-- YAM variant of sawyer_handle_press_sideways.xml — auto-transformed: yam_xyz_base replaces xyz_base, actuator+weld blocks removed. -->
+    <include file="../scene/basic_scene.xml"/>
+    <include file="../objects/assets/handle_press_dependencies.xml"/>
+    <include file="../objects/assets/yam_xyz_base_dependencies.xml"/>
+
+    <worldbody>
+      <include file="../objects/assets/yam_xyz_base.xml"/>
+
+      <body name="box" euler="0 0 1.57" pos="-.4 0.6 0">
+        <include file="../objects/assets/handle_press.xml"/>
+
+        <site name="goalPress" pos="0 -0.216 0.075" size="0.005" rgba="1 1 1 1"/>
+        <site name="goalPull" pos="0 -0.216 0.172" size="0.005" rgba="0 0 0 1"/>
+      </body>
+    </worldbody>
+
+</mujoco>

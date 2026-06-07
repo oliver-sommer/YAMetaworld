@@ -106,7 +106,7 @@ class SawyerPushBackEnvV3(SawyerXYZEnv):
             self.data.geom("objGeom").xmat.reshape(3, 3)
         ).as_quat()
 
-    def adjust_initObjPos(self, orig_init_pos: npt.NDArray[Any]) -> npt.NDArray[Any]:
+    def adjust_initObjPos(self, orig_init_pos: npt.NDArray[Any]) -> npt.NDArray[Any]:  # noqa: N802
         # This is to account for meshes for the geom and object are not aligned
         # If this is not done, the object could be initialized in an extreme position
         diff = self.get_body_com("obj")[:2] - self.data.geom("objGeom").xpos[:2]

@@ -66,7 +66,7 @@ class SawyerPegUnplugSideEnvV3(SawyerXYZEnv):
         (
             reward,
             tcp_to_obj,
-            tcp_open,
+            _tcp_open,
             obj_to_target,
             grasp_reward,
             in_place_reward,
@@ -96,9 +96,10 @@ class SawyerPegUnplugSideEnvV3(SawyerXYZEnv):
     def _set_obj_xyz(self, pos: npt.NDArray[Any]) -> None:
         qpos = self.data.qpos.flat.copy()
         qvel = self.data.qvel.flat.copy()
-        qpos[9:12] = pos
-        qpos[12:16] = np.array([1.0, 0.0, 0.0, 0.0])
-        qvel[9:12] = 0
+        adr, dofadr = self._first_free_joint_adr()
+        qpos[adr : adr + 3] = pos
+        qpos[adr + 3 : adr + 7] = np.array([1.0, 0.0, 0.0, 0.0])
+        qvel[dofadr : dofadr + 6] = 0
         self.set_state(qpos, qvel)
 
     def reset_model(self) -> npt.NDArray[np.float64]:
