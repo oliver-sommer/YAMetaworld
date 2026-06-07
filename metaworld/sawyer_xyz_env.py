@@ -260,6 +260,14 @@ class SawyerXYZEnv(SawyerMocapBase, EzPickle):
 
         self.task_name = self.__class__.__name__
 
+        # Injectable hooks for non-Sawyer arms (e.g. YAM IK control).
+        # When set, these replace the default Sawyer mocap-based actuation and
+        # hand-reset logic.  Set them on the env instance before the first step.
+        # Signature for _external_actuation: (env, action: np.ndarray) -> None
+        # Signature for _external_reset_hand: (env, steps: int) -> None
+        self._external_actuation: Any | None = None
+        self._external_reset_hand: Any | None = None
+
         EzPickle.__init__(
             self,
             self.model_name,
@@ -351,13 +359,31 @@ class SawyerXYZEnv(SawyerMocapBase, EzPickle):
     def _set_obj_xyz(self, pos: npt.NDArray[Any]) -> None:
         """Sets the position of the object.
 
+        Locates the first free joint in the model dynamically so that the
+        function is correct for any arm DOF count (e.g. YAM = 8 vs Sawyer = 9).
+
         Args:
             pos: The position to set as a numpy array of 3 elements (XYZ value).
         """
         qpos = self.data.qpos.flat.copy()
         qvel = self.data.qvel.flat.copy()
-        qpos[9:12] = pos.copy()
-        qvel[9:15] = 0
+
+        # Find the qpos / dof address of the first free joint in the model.
+        # For Sawyer this resolves to qpos[9] / dof[9] (identical to the old
+        # hard-coded slice); for YAM it resolves to qpos[8] / dof[8].
+        obj_qpos_adr: int | None = None
+        obj_dof_adr: int | None = None
+        for jid in range(self.model.njnt):
+            if self.model.jnt_type[jid] == mujoco.mjtJoint.mjJNT_FREE:
+                obj_qpos_adr = int(self.model.jnt_qposadr[jid])
+                obj_dof_adr = int(self.model.jnt_dofadr[jid])
+                break
+
+        if obj_qpos_adr is None:
+            raise RuntimeError("No free joint found in model; cannot set object xyz.")
+
+        qpos[obj_qpos_adr : obj_qpos_adr + 3] = pos.copy()
+        qvel[obj_dof_adr : obj_dof_adr + 6] = 0
         self.set_state(qpos, qvel)
 
     def _get_site_pos(self, site_name: str) -> npt.NDArray[np.float64]:
@@ -576,6 +602,22 @@ class SawyerXYZEnv(SawyerMocapBase, EzPickle):
             dtype=np.float64,
         )
 
+    def _apply_action(self, action: npt.NDArray[np.float32]) -> None:
+        """Apply a 4-D action to the environment for one controlled step.
+
+        Default (Sawyer): move the mocap body by the XYZ delta and simulate
+        ``frame_skip`` physics steps with the gripper torque.
+
+        Override by setting ``self._external_actuation`` to a callable with
+        signature ``(env, action) -> None``.  When set, the callable is fully
+        responsible for advancing the physics (including calling mj_step).
+        """
+        if self._external_actuation is not None:
+            self._external_actuation(self, action)
+        else:
+            self.set_xyz_action(action[:3])
+            self.do_simulation([action[-1], -action[-1]], n_frames=self.frame_skip)
+
     @_Decorators.assert_task_is_set
     def step(
         self, action: npt.NDArray[np.float32]
@@ -589,10 +631,9 @@ class SawyerXYZEnv(SawyerMocapBase, EzPickle):
             The (next_obs, reward, terminated, truncated, info) tuple.
         """
         assert len(action) == 4, f"Actions should be size 4, got {len(action)}"
-        self.set_xyz_action(action[:3])
         if self.curr_path_length >= self.max_path_length:
             raise ValueError("You must reset the env manually once truncate==True")
-        self.do_simulation([action[-1], -action[-1]], n_frames=self.frame_skip)
+        self._apply_action(action)
         self.curr_path_length += 1
 
         # Running the simulator can sometimes mess up site positions, so
@@ -684,10 +725,28 @@ class SawyerXYZEnv(SawyerMocapBase, EzPickle):
     def _reset_hand(self, steps: int = 50) -> None:
         """Resets the hand position.
 
+        Default (Sawyer): servo the mocap body to ``hand_init_pos`` for
+        ``steps`` physics steps with the gripper closed.
+
+        Override by setting ``self._external_reset_hand`` to a callable with
+        signature ``(env, steps: int) -> None``.  The callable must set
+        ``env.init_tcp`` at the end.
+
         Args:
             steps: The number of steps to take to reset the hand.
         """
-        mocap_id = self.model.body_mocapid[self.data.body("mocap").id]
+        if self._external_reset_hand is not None:
+            self._external_reset_hand(self, steps)
+            return
+        try:
+            mocap_body_id = self.data.body("mocap").id
+        except KeyError:
+            # No mocap body (non-Sawyer arm).  The real reset is handled by
+            # _external_reset_hand once the controller is wired in; this path
+            # is only reached during MT1.__init__ before the hook is injected.
+            self.init_tcp = self.tcp_center
+            return
+        mocap_id = self.model.body_mocapid[mocap_body_id]
         for _ in range(steps):
             self.data.mocap_pos[mocap_id][:] = self.hand_init_pos
             self.data.mocap_quat[mocap_id][:] = np.array([1, 0, 1, 0])

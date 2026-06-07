@@ -1,0 +1,93 @@
+<mujocoinclude>
+    <!--
+    YAM arm base dependencies for Meta-World task XMLs.
+
+    Include from a task XML at yam_xyz/<task>.xml via:
+        <include file="../objects/assets/yam_xyz_base_dependencies.xml"/>
+
+    Provides: default classes, mesh assets, position actuators (joint1-6 +
+    gripper), and the finger-coupling equality constraint.
+
+    Mesh paths follow the same convention as xyz_base_dependencies.xml,
+    resolved from the main XML's directory at yam_xyz/:
+        ../objects/meshes/yam_base/<file>.stl
+    -->
+
+    <!-- Reuse Sawyer compiler flags (angle in radians, auto-inertia for
+         collision groups 4-5).  YAM bodies use explicit <inertial> elements
+         which take priority over auto-computed ones.  -->
+    <compiler angle="radian" inertiafromgeom="auto" inertiagrouprange="4 5"/>
+
+    <asset>
+        <material name="yam_black" rgba="0.25 0.25 0.25 1"/>
+        <material name="yam_white" rgba="0.9 0.9 0.9 1"/>
+
+        <!-- All 17 YAM arm meshes.  Paths match the same ../objects/meshes/ convention
+             that Sawyer's xyz_base_dependencies.xml uses, so they resolve correctly
+             from any task XML at the yam_xyz/ directory level. -->
+        <mesh file="../objects/meshes/yam_base/model2.stl"    name="yam_model2"/>
+        <mesh file="../objects/meshes/yam_base/model2__2.stl"  name="yam_model2__2"/>
+        <mesh file="../objects/meshes/yam_base/model2__3.stl"  name="yam_model2__3"/>
+        <mesh file="../objects/meshes/yam_base/model2__4.stl"  name="yam_model2__4"/>
+        <mesh file="../objects/meshes/yam_base/model2__5.stl"  name="yam_model2__5"/>
+        <mesh file="../objects/meshes/yam_base/model2__6.stl"  name="yam_model2__6"/>
+        <mesh file="../objects/meshes/yam_base/model2__7.stl"  name="yam_model2__7"/>
+        <mesh file="../objects/meshes/yam_base/model2__8.stl"  name="yam_model2__8"/>
+        <mesh file="../objects/meshes/yam_base/model2__9.stl"  name="yam_model2__9"/>
+        <mesh file="../objects/meshes/yam_base/model2__10.stl" name="yam_model2__10"/>
+        <mesh file="../objects/meshes/yam_base/model2__11.stl" name="yam_model2__11"/>
+        <mesh file="../objects/meshes/yam_base/model2__12.stl" name="yam_model2__12"/>
+        <mesh file="../objects/meshes/yam_base/model2__13.stl" name="yam_model2__13"/>
+        <mesh file="../objects/meshes/yam_base/model2__14.stl" name="yam_model2__14"/>
+        <mesh file="../objects/meshes/yam_base/model2__15.stl" name="yam_model2__15"/>
+        <mesh file="../objects/meshes/yam_base/model2__16.stl" name="yam_model2__16"/>
+        <mesh file="../objects/meshes/yam_base/model2__17.stl" name="yam_model2__17"/>
+    </asset>
+
+    <default>
+        <default class="yam">
+            <position inheritrange="1"/>
+            <joint frictionloss="0.1" axis="0 0 1"/>
+            <default class="dm4340">
+                <joint armature="0.032"/>
+                <position kp="40" kv="2.5" forcerange="-28 28"/>
+            </default>
+            <default class="dm4310">
+                <joint armature="0.0018"/>
+                <position kp="10" kv="1" forcerange="-10 10"/>
+            </default>
+            <default class="yam_visual">
+                <geom type="mesh" contype="0" conaffinity="0" density="0" group="2" material="yam_black"/>
+            </default>
+            <default class="yam_collision">
+                <geom group="3" type="capsule"/>
+                <default class="yam_sphere_collision">
+                    <geom size="0.0006 0 0" type="sphere" rgba="1 0 0 1"/>
+                </default>
+            </default>
+            <default class="yam_finger">
+                <joint type="slide" armature="0.1" frictionloss="0.1"/>
+                <position ctrlrange="0.0 0.041" kp="100" kv="10" inheritrange="0"/>
+            </default>
+        </default>
+    </default>
+
+    <!-- YAM arm position actuators (6 arm joints + 1 gripper).
+         The right_finger joint is constrained via the equality below; it has
+         no separate actuator. -->
+    <actuator>
+        <position name="joint1" joint="joint1" class="dm4340"/>
+        <position name="joint2" joint="joint2" class="dm4340"/>
+        <position name="joint3" joint="joint3" class="dm4340"/>
+        <position name="joint4" joint="joint4" class="dm4310" kp="20" kv=".5"/>
+        <position name="joint5" joint="joint5" class="dm4310"/>
+        <position name="joint6" joint="joint6" class="dm4310"/>
+        <position class="yam_finger" name="gripper" joint="left_finger"/>
+    </actuator>
+
+    <!-- Finger coupling: right_finger mirrors left_finger with sign flip. -->
+    <equality>
+        <joint joint1="left_finger" joint2="right_finger" polycoef="0 -1 0 0 0"/>
+    </equality>
+
+</mujocoinclude>

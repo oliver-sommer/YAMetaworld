@@ -16,6 +16,7 @@ import numpy.typing as npt
 from gymnasium.envs.registration import register
 
 import metaworld.env_dict as _env_dict
+from metaworld.asset_path_utils import set_active_arm  # noqa: F401
 from metaworld.env_dict import (
     ALL_V3_ENVIRONMENTS,
     ALL_V3_ENVIRONMENTS_GOAL_HIDDEN,

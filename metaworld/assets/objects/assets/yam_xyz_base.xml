@@ -1,0 +1,231 @@
+<mujocoinclude>
+    <!--
+    YAM arm body for Meta-World task XMLs.
+
+    This file replaces xyz_base.xml for YAM-based tasks.  It provides:
+      - The same cameras as xyz_base.xml (topview, corner, corner2, corner3, corner4).
+      - The YAM arm kinematic body hierarchy, placed and oriented so that its
+        workspace covers Meta-World's tabletop region (objects at y≈0.6,
+        z∈[0.02, 0.5], x∈[-0.3, 0.3]).
+      - Meta-World-required body / geom / site names:
+          • body "hand"                — TCP reference (xpos = EE position)
+          • bodies "leftclaw" / "rightclaw" — gripper finger bodies
+          • bodies "leftpad" / "rightpad"   — finger pads (with contact geoms)
+          • geoms "leftpad_geom" / "rightpad_geom" — contact surfaces for grasp detection
+          • sites "leftEndEffector" / "rightEndEffector" — fingertip sites for tcp_center
+
+    The arm base is placed at pos="0 0.4 0" with a 90° CCW rotation around the
+    world z-axis (quat="0.707 0 0 0.707").  In its natural orientation the YAM
+    arm reaches in the +x direction; after rotation it reaches in +y, placing
+    the TCP above the table at y≈0.6 in home pose.
+
+    *** Workspace tuning ***: if grasp_site is mis-positioned at home pose, adjust
+    the arm body's pos and/or quat.  Run:
+        pixi run python -c "
+          import mujoco, numpy as np
+          m = mujoco.MjModel.from_xml_path('<task_xml_path>')
+          d = mujoco.MjData(m)
+          mujoco.mj_forward(m, d)
+          sid = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_SITE, 'grasp_site')
+          print('grasp_site xpos:', d.site_xpos[sid])
+        "
+    -->
+
+    <!-- Cameras (identical to xyz_base.xml) -->
+    <camera pos="0 0.5 1.5" name="topview"/>
+    <camera name="corner" mode="fixed" pos="-1.1 -0.4 0.6" xyaxes="-1 1 0 -0.2 -0.2 -1"/>
+    <camera name="corner2" fovy="60" mode="fixed" pos="1.3 -0.2 1.1" euler="3.9 2.3 0.6"/>
+    <camera name="corner3" fovy="45" mode="fixed" pos="0.9 0 1.5" euler="3.5 2.7 1"/>
+    <camera name="corner4" fovy="60" mode="fixed" pos="0.75 0.075 0.7" euler="3.9 2.3 0.6"/>
+
+    <!--
+        YAM arm body.
+        pos="0 0.4 0": shifted 0.4 m forward in world y so the workspace centres
+                         on the MW table (y≈0.6).
+        quat="0.707 0 0 0.707": 90° CCW around world z, mapping arm's natural +x
+                                  direction to world +y.
+
+        Joint ref values: joint2 and joint3 set to 1.047 rad (≈60°) so that after
+        mj_resetData the arm is already in the home "gripper-down" pose and
+        init_qpos captures this correctly.
+    -->
+    <body name="arm" childclass="yam" pos="0 0.4 0" quat="0.707 0 0 0.707">
+        <geom class="yam_visual" pos="0 0 -0.0006" quat="1 0 0 1" mesh="yam_model2"/>
+        <geom class="yam_collision" size="0.033 0.01" pos="0.0 0.0 0.026" quat="1 0 0 0"/>
+        <body name="link_1" pos="0 0 0.0631" quat="1 0 0 1">
+            <inertial pos="-0.00192861 -0.00795735 0.0208176"
+                      quat="0.297851 0.642634 0.360045 0.607185"
+                      mass="0.12415" diaginertia="0.000180751 0.000145532 5.89179e-05"/>
+            <joint name="joint1" range="-2.61799 3.05433" class="dm4340"/>
+            <geom class="yam_visual" pos="5.26159e-07 2.34355e-07 -0.0632" quat="1 0 0 0" mesh="yam_model2__2"/>
+            <body name="link_2" pos="2.5e-05 -0.02 0.0409" quat="1 1 1 1" gravcomp="1">
+                <inertial pos="0.132008 2.10599e-06 0.000293073"
+                          quat="1 1 1 1" mass="1.24434"
+                          diaginertia="0.0121902 0.0121318 0.000683304"/>
+                <!-- ref="1.047" → qpos0 = 1.047 rad (home pose) after mj_resetData -->
+                <joint name="joint2" range="0 3.66519" class="dm4340" ref="1.047"/>
+                <geom class="yam_visual" pos="0.0199992 -0.1041 -2.44738e-05" quat="1 -1 -1 -1" mesh="yam_model2__3"/>
+                <geom class="yam_visual" pos="0.0199992 -0.1041 -2.44738e-05" quat="1 -1 -1 -1" mesh="yam_model2__4"/>
+                <geom class="yam_visual" pos="0.0199992 -0.1041 -2.44738e-05" quat="1 -1 -1 -1" mesh="yam_model2__5" material="yam_white"/>
+                <geom class="yam_collision" size="0.032 0.11" pos="0.13 0 0" quat="1 0 1 0"/>
+                <geom class="yam_collision" size="0.033 0.02" pos="0 0.0 0" quat="1 0 0 0"/>
+                <geom class="yam_collision" size="0.033 0.025" pos="0.265 0 0" quat="1 0 0 0"/>
+                <body name="link_3" pos="0.264 0 0" quat="0 1 0 0" gravcomp="1">
+                    <inertial pos="-0.121816 -0.054846 -0.000111108"
+                              quat="1 1 1 1" mass="0.853698"
+                              diaginertia="0.00699732 0.00696112 0.000788244"/>
+                    <!-- ref="1.047" → qpos0 = 1.047 rad (home pose) after mj_resetData -->
+                    <joint name="joint3" range="0 3.66519" class="dm4340" ref="1.047"/>
+                    <geom class="yam_visual" pos="-0.244001 0.104101 2.44738e-05" quat="1 1 1 -1" mesh="yam_model2__6"/>
+                    <geom class="yam_visual" pos="-0.244001 0.104101 2.44738e-05" quat="1 1 1 -1" mesh="yam_model2__7"/>
+                    <geom class="yam_visual" pos="-0.244001 0.104101 2.44738e-05" quat="1 1 1 -1" mesh="yam_model2__8" material="yam_white"/>
+                    <geom class="yam_visual" pos="-0.244001 0.104101 2.44738e-05" quat="1 1 1 -1" mesh="yam_model2__9"/>
+                    <geom class="yam_collision" size="0.034 0.12" pos="-0.14 -0.06 0.0" quat="1 0 1 0"/>
+                    <geom class="yam_collision" size="0.034 0.015" pos="-0.24 -0.06 0.0" quat="1 0 0 0"/>
+                    <body name="link_4" pos="-0.245 -0.06 0" quat="1 0 0 0" gravcomp="1">
+                        <inertial pos="-0.0769778 -0.0527104 0.000154878"
+                                  quat="0.667 0.667 -0.236 -0.236" mass="0.463511"
+                                  diaginertia="0.000791532 0.000744733 0.000282116"/>
+                        <joint name="joint4" range="-1.5708 1.5708" class="dm4310"/>
+                        <geom class="yam_visual" pos="0.00100023 0.164101 2.44738e-05" quat="1 1 1 -1" mesh="yam_model2__10"/>
+                        <geom class="yam_collision" size="0.03 0.015" pos="-0.073 -0.06 0.0" quat="1 1 0 0"/>
+                        <body name="link_5" pos="-0.074 -0.0395 2.5e-05" quat="1 -1 1 1" gravcomp="1">
+                            <inertial pos="3.64861e-05 0.00025665 0.0353526"
+                                      quat="1 0 0 0" mass="0.350962"
+                                      diaginertia="0.000197802 0.0001775 0.000147402"/>
+                            <joint name="joint5" range="-1.5708 1.5708" class="dm4310"/>
+                            <geom class="yam_visual" pos="0 -0.0749971 0.203601" quat="1.32679e-06 1 0 0" mesh="yam_model2__11"/>
+                            <geom class="yam_collision" size="0.030 0.015" pos="0 0.025 0.0395" quat="1 1 0 0"/>
+                            <body name="link_6" pos="0 0.0353 0.0395" quat="1 -1 0 0" gravcomp="1">
+                                <inertial pos="-0.000217767 7.37059e-05 0.0270545"
+                                          quat="1 1 0 0" mass="0.367476"
+                                          diaginertia="0.000265958 0.000242686 0.000227409"/>
+                                <joint name="joint6" range="-2.0944 2.0944" class="dm4310"/>
+                                <geom class="yam_visual" pos="0 -0.164101 -0.110597" quat="1 -1 0 0" mesh="yam_model2__12"/>
+                                <geom class="yam_visual" pos="0 -0.164101 -0.110597" quat="1 -1 0 0" mesh="yam_model2__13"/>
+                                <geom class="yam_collision" size="0.01 0.035" pos="0 0.039 0.052" quat="1 0 1 0"/>
+                                <geom class="yam_collision" size="0.030 0.005" pos="0 0.0 0.03" quat="1 0 0 1"/>
+                                <geom class="yam_collision" size="0.01 0.035" pos="0 -0.039 0.052" quat="1 0 1 0"/>
+
+                                <!-- IK TCP site (used by EEController) -->
+                                <site name="tcp_site" pos="0 0 0" quat="1 0 0 -1" size="0.005" rgba="1 0 0 1" group="4"/>
+                                <site name="grasp_site" pos="0 0 0.1347" quat="1 0 0 -1" size="0.005" rgba="0 1 0 1" group="4"/>
+
+                                <!--
+                                    "hand" body — Meta-World's get_endeff_pos() reads this body's xpos
+                                    as the end-effector position in the observation.  Placed at the
+                                    same position as grasp_site (TCP midpoint).
+                                -->
+                                <body name="hand" pos="0 0 0.1347">
+                                    <inertial pos="0 0 0" mass="0.001" diaginertia="1e-6 1e-6 1e-6"/>
+                                    <!--
+                                        leftEndEffector / rightEndEffector placed here (in the hand
+                                        body) so that tcp_center = (left+right)/2 exactly equals
+                                        the hand body position = grasp_site.  The ±0.01 x-offset is
+                                        cosmetic (MW only uses the midpoint for reward/success).
+                                    -->
+                                    <site name="leftEndEffector"  pos=" 0.01 0 0" size="0.01" rgba="0 1 0 1" group="4"/>
+                                    <site name="rightEndEffector" pos="-0.01 0 0" size="0.01" rgba="1 0 0 1" group="4"/>
+                                </body>
+
+                                <!--
+                                    Left finger chain.  The body is named "leftclaw" for Meta-World
+                                    compatibility (SawyerXYZEnv reads body("leftclaw").xpos for the
+                                    gripper-distance observation).  The joint name "left_finger" is
+                                    kept so the equality constraint and EEController actuator lookup
+                                    still resolve correctly.
+                                -->
+                                <body name="leftclaw" pos="-0.037 0.0392 0.0605" quat="1 0 1 0" gravcomp="1">
+                                    <inertial pos="-0.0192995 -0.0365902 0.039774"
+                                              quat="0.757351 0.568898 -0.3199 0.0" mass="0.118"
+                                              diaginertia="0.000159084 0.000154909 4.63655e-05"/>
+                                    <joint class="yam_finger" name="left_finger" range="-0.00205 0.037524"/>
+                                    <geom class="yam_visual" pos="0.171097 -0.203301 0.037" quat="1 -1 -1 -1" mesh="yam_model2__14"/>
+                                    <geom class="yam_visual" pos="0.171097 -0.203301 0.037" quat="1 -1 -1 -1" mesh="yam_model2__15"/>
+
+
+                                    <body name="lf_rot" quat="1 -1 -1 1" pos="0.0 -0.0392 0.037" gravcomp="1">
+                                        <geom class="yam_collision" size="0.01 0.03" pos="0.0 -0.02 0.012" quat="1 0 1 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                        <geom class="yam_collision" size="0.01 0.02" pos="-0.02 -0.01 0.032" quat="1 0 2.5 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                        <body name="lf_down" quat="1 0 0 0" pos="-0.044 0.0 0.0" gravcomp="1">
+                                            <geom class="yam_collision" size="0.01 0.01" pos="0.0 -0.020 0.012" quat="1 -0.1 0 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                            <geom class="yam_collision" size="0.003 0.022" pos="0.005 -0.014 0.04" quat="1 -0.2 0 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                            <geom class="yam_collision" size="0.003 0.022" pos="-0.005 -0.014 0.04" quat="1 -0.2 0 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                            <geom class="yam_collision" type="box" size="0.006 0.002 0.04" pos="0 -0.0024 0.046" quat="1 0 0 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                            <geom class="yam_collision" type="box" size="0.006 0.002 0.039" pos="0.027 -0.0024 0.053" quat="1 0 2.5 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                            <geom class="yam_sphere_collision" pos="0.003 -0.0004 0.078"/>
+                                            <geom class="yam_sphere_collision" pos="-0.003 -0.0004 0.078"/>
+                                            <geom class="yam_sphere_collision" pos="0.003 -0.0004 0.07"/>
+                                            <geom class="yam_sphere_collision" pos="-0.003 -0.0004 0.07"/>
+                                            <geom class="yam_sphere_collision" pos="0.003 -0.0004 0.06"/>
+                                            <geom class="yam_sphere_collision" pos="-0.003 -0.0004 0.06"/>
+
+                                            <!--
+                                                "leftpad" body with contact geom for Meta-World's
+                                                touching_object() check.  Placed at the fingertip
+                                                contact zone (approximate; tune with MuJoCo viewer).
+                                            -->
+                                            <body name="leftpad" pos="0 -0.001 0.07">
+                                                <inertial pos="0 0 0" mass="0.001" diaginertia="1e-6 1e-6 1e-6"/>
+                                                <geom name="leftpad_geom" type="box" size="0.008 0.003 0.012"
+                                                      contype="1" conaffinity="1" condim="4"
+                                                      solimp="0.95 0.99 0.01" solref="0.01 1"
+                                                      friction="2 0.1 0.002" rgba="0 1 0 0.5"/>
+                                            </body>
+                                        </body>
+                                    </body>
+                                </body>
+
+                                <!--
+                                    Right finger chain.  Named "rightclaw" for Meta-World
+                                    compatibility.  Joint name "right_finger" kept for equality.
+                                -->
+                                <body name="rightclaw" pos="0.037 -0.0392 0.0605" quat="1 0 1 0" gravcomp="1">
+                                    <inertial pos="-0.0192995 0.0365902 -0.039774"
+                                              quat="-0.757351 0.568898 -0.3199 0" mass="0.118"
+                                              diaginertia="0.000159084 0.000154909 4.63655e-05"/>
+                                    <joint class="yam_finger" name="right_finger" range="-0.037524 0.00205"/>
+                                    <geom class="yam_visual" pos="0.171097 -0.124901 -0.037" quat="1 -1 -1 -1" mesh="yam_model2__16"/>
+                                    <geom class="yam_visual" pos="0.171097 -0.124901 -0.037" quat="1 -1 -1 -1" mesh="yam_model2__17"/>
+
+
+                                    <body name="rf_rot" quat="1 1 -1 -1" pos="0.0 0.0392 -0.037" gravcomp="1">
+                                        <geom class="yam_collision" size="0.01 0.03" pos="0.0 -0.02 0.012" quat="1 0 1 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                        <geom class="yam_collision" size="0.01 0.02" pos="0.02 -0.01 0.032" quat="1 0 -2.5 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                        <body name="rf_down" quat="1 0 0 0" pos="0.044 0.0 0.0" gravcomp="1">
+                                            <geom class="yam_collision" size="0.01 0.01" pos="0.0 -0.020 0.012" quat="1 -0.1 0 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                            <geom class="yam_collision" size="0.003 0.022" pos="0.005 -0.014 0.04" quat="1 -0.2 0 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                            <geom class="yam_collision" size="0.003 0.022" pos="-0.005 -0.014 0.04" quat="1 -0.2 0 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                            <geom class="yam_collision" type="box" size="0.006 0.002 0.04" pos="0 -0.0024 0.046" quat="1 0 0 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                            <geom class="yam_collision" type="box" size="0.006 0.002 0.039" pos="-0.027 -0.0024 0.053" quat="1 0 -2.5 0" rgba="0.381493 0.492734 0.780446 1"/>
+                                            <geom class="yam_sphere_collision" pos="0.003 -0.0004 0.078"/>
+                                            <geom class="yam_sphere_collision" pos="-0.003 -0.0004 0.078"/>
+                                            <geom class="yam_sphere_collision" pos="0.003 -0.0004 0.07"/>
+                                            <geom class="yam_sphere_collision" pos="-0.003 -0.0004 0.07"/>
+                                            <geom class="yam_sphere_collision" pos="0.003 -0.0004 0.06"/>
+                                            <geom class="yam_sphere_collision" pos="-0.003 -0.0004 0.06"/>
+
+                                            <!--
+                                                "rightpad" body with contact geom for Meta-World's
+                                                touching_object() check.
+                                            -->
+                                            <body name="rightpad" pos="0 -0.001 0.07">
+                                                <inertial pos="0 0 0" mass="0.001" diaginertia="1e-6 1e-6 1e-6"/>
+                                                <geom name="rightpad_geom" type="box" size="0.008 0.003 0.012"
+                                                      contype="1" conaffinity="1" condim="4"
+                                                      solimp="0.95 0.99 0.01" solref="0.01 1"
+                                                      friction="2 0.1 0.002" rgba="1 0 0 0.5"/>
+                                            </body>
+                                        </body>
+                                    </body>
+                                </body>
+
+                            </body>  <!-- link_6 -->
+                        </body>  <!-- link_5 -->
+                    </body>  <!-- link_4 -->
+                </body>  <!-- link_3 -->
+            </body>  <!-- link_2 -->
+        </body>  <!-- link_1 -->
+    </body>  <!-- arm -->
+
+</mujocoinclude>

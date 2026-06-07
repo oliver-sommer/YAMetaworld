@@ -1,0 +1,16 @@
+<mujoco>
+    <!-- YAM variant of sawyer_door_pull.xml (door-open task). -->
+    <include file="../scene/basic_scene.xml"/>
+    <include file="../objects/assets/doorlock_dependencies.xml"/>
+    <include file="../objects/assets/yam_xyz_base_dependencies.xml"/>
+
+    <worldbody>
+        <include file="../objects/assets/yam_xyz_base.xml"/>
+
+        <body name="door" pos="0 0.9 0.15">
+            <include file="../objects/assets/doorlockB.xml"/>
+        </body>
+
+        <site name="goal" pos="-0.49 0.46 0.15" size="0.02" rgba="0 0.8 0 1"/>
+    </worldbody>
+</mujoco>
