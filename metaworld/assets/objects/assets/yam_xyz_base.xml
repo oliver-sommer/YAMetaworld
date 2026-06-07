@@ -14,10 +14,11 @@
           • geoms "leftpad_geom" / "rightpad_geom" — contact surfaces for grasp detection
           • sites "leftEndEffector" / "rightEndEffector" — fingertip sites for tcp_center
 
-    The arm base is placed at pos="0 0.4 0" with a 90° CCW rotation around the
-    world z-axis (quat="0.707 0 0 0.707").  In its natural orientation the YAM
-    arm reaches in the +x direction; after rotation it reaches in +y, placing
-    the TCP above the table at y≈0.6 in home pose.
+    The arm base is placed at pos="0 0.20 0" at the near edge of the table (z=0,
+    table surface level).  The near retaining wall is removed in basic_scene.xml.
+    quat="0.707 0 0 0.707" (90° CCW around world z) maps the arm's natural +x
+    reach direction to world +y, so the arm reaches forward onto the table.
+    TCP home is gripper-down at y≈0.445, z≈0.16.
 
     *** Workspace tuning ***: if grasp_site is mis-positioned at home pose, adjust
     the arm body's pos and/or quat.  Run:
@@ -40,16 +41,19 @@
 
     <!--
         YAM arm body.
-        pos="0 0.4 0": shifted 0.4 m forward in world y so the workspace centres
-                         on the MW table (y≈0.6).
+        pos="0 0.20 0": base at the near edge of the table (y=0.20 = table near edge),
+                         sitting on the table surface (z=0).  The near retaining wall has
+                         been removed from basic_scene.xml to make room.  The arm reaches
+                         forward in +y onto the table; TCP home is gripper-down at
+                         y≈0.445, z≈0.16 with the workspace covering y≈0.4–0.65.
         quat="0.707 0 0 0.707": 90° CCW around world z, mapping arm's natural +x
-                                  direction to world +y.
+                                  direction to world +y (reaching forward onto the table).
 
-        Joint ref values: joint2 and joint3 set to 1.047 rad (≈60°) so that after
-        mj_resetData the arm is already in the home "gripper-down" pose and
-        init_qpos captures this correctly.
+        Joint ref values: joint2 and joint3 kept at 1.047 rad (≈60°) — this is the
+        "gripper-down" home pose; EEController auto-captures the TCP orientation from
+        it via mj_resetData → mj_forward → mju_mat2Quat.
     -->
-    <body name="arm" childclass="yam" pos="0 0.4 0" quat="0.707 0 0 0.707">
+    <body name="arm" childclass="yam" pos="0 0.23 0.01" quat="0.707 0 0 0.707">
         <geom class="yam_visual" pos="0 0 -0.0006" quat="1 0 0 1" mesh="yam_model2"/>
         <geom class="yam_collision" size="0.033 0.01" pos="0.0 0.0 0.026" quat="1 0 0 0"/>
         <body name="link_1" pos="0 0 0.0631" quat="1 0 0 1">
