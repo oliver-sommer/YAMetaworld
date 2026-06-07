@@ -9,6 +9,23 @@
         <texture name="T_table" type="cube" file="../textures/wood2.png"/>
         <texture name="T_floor" type="2d" file="../textures/floor2.png"/>
 
+        <!-- DR texture pools: loaded at model init, swapped per episode at runtime.        -->
+        <!-- Cube pool for table-top and retaining walls (T_pool_*).                        -->
+        <texture name="T_pool_0" type="cube" file="../textures/wood1.png"/>
+        <texture name="T_pool_1" type="cube" file="../textures/wood3.png"/>
+        <texture name="T_pool_2" type="cube" file="../textures/wood4.png"/>
+        <texture name="T_pool_3" type="cube" file="../textures/darkwood.png"/>
+        <texture name="T_pool_4" type="cube" file="../textures/marble.png"/>
+        <texture name="T_pool_5" type="cube" file="../textures/granite.png"/>
+        <texture name="T_pool_6" type="cube" file="../textures/plaster1.png"/>
+        <texture name="T_pool_7" type="cube" file="../textures/metal1.png"/>
+        <texture name="T_pool_8" type="cube" file="../textures/metal2.png"/>
+        <!-- 2d pool for the floor plane (T_floorpool_*).                                   -->
+        <texture name="T_floorpool_0" type="2d" file="../textures/floor1.png"/>
+        <texture name="T_floorpool_1" type="2d" file="../textures/wood_light.png"/>
+        <texture name="T_floorpool_2" type="2d" file="../textures/navy_blue.png"/>
+        <texture name="T_floorpool_3" type="2d" file="../textures/plaster1.png"/>
+
         <material name="basic_floor" texture="T_floor" texrepeat="12 12" shininess=".3" specular="0.5"
                   reflectance="0.2"/>
         <material name="table_wood" texture="T_table" shininess=".3" specular="0.5"/>

@@ -151,7 +151,7 @@ class SawyerDoorEnvV3(SawyerXYZEnv):
             else reward_utils.tolerance(
                 floor - hand[2],
                 bounds=(0.0, 0.01),
-                margin=floor / 2.0,
+                margin=max(floor / 2.0, 0.0),
                 sigmoid="long_tail",
             )
         )
