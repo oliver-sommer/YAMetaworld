@@ -115,11 +115,20 @@
                                 <site name="tcp_site" pos="0 0 0" quat="1 0 0 -1" size="0.005" rgba="1 0 0 1" group="4"/>
                                 <site name="grasp_site" pos="0 0 0.1347" quat="1 0 0 -1" size="0.005" rgba="0 1 0 1" group="4"/>
 
+
                                 <!--
                                     "hand" body — Meta-World's get_endeff_pos() reads this body's xpos
                                     as the end-effector position in the observation.  Placed at the
                                     same position as grasp_site (TCP midpoint).
                                 -->
+                                <!-- Wrist-eye camera: mounted on link_6, auto-aimed at the TCP (hand body).
+                                     pos in link_6 local frame: local-y = world-up, local-z = gripper axis.
+                                     (0, 0.08, 0.05) sits 8 cm above and 5 cm behind the hand,
+                                     giving ~45° forward/down view of the end-effector at home pose.
+                                     targetbody keeps the EE centred as the wrist moves. -->
+                                <camera name="wrist" mode="targetbody" target="hand"
+                                        pos="0 0.08 0.05" fovy="75"/>
+
                                 <body name="hand" pos="0 0 0.1347">
                                     <inertial pos="0 0 0" mass="0.001" diaginertia="1e-6 1e-6 1e-6"/>
                                     <!--
