@@ -121,13 +121,16 @@
                                     as the end-effector position in the observation.  Placed at the
                                     same position as grasp_site (TCP midpoint).
                                 -->
-                                <!-- Wrist-eye camera: mounted on link_6, auto-aimed at the TCP (hand body).
+                                <!-- Wrist-eye camera: rigidly bolted to link_6, so it translates AND
+                                     rolls with the gripper (joint6) — true wrist-cam behaviour.
                                      pos in link_6 local frame: local-y = world-up, local-z = gripper axis.
-                                     (0, 0.08, 0.05) sits 8 cm above and 5 cm behind the hand,
-                                     giving ~45° forward/down view of the end-effector at home pose.
-                                     targetbody keeps the EE centred as the wrist moves. -->
-                                <camera name="wrist" mode="targetbody" target="hand"
-                                        pos="0 0.08 0.05" fovy="75"/>
+                                     (0, 0.08, 0.05) sits 8 cm above and 5 cm behind the TCP.
+                                     xyaxes computed via look-at from pos toward hand (0,0,0.1347):
+                                       view_dir = normalize(hand - pos) = (0, -0.6867, 0.7270)
+                                       x = (-1,0,0)  y = (0, 0.7270, 0.6870)  z = x×y = (0,0.6870,-0.7270)
+                                     The -z axis (view direction) points at the TCP. -->
+                                <camera name="wrist" mode="fixed" pos="0 0.08 0.05" fovy="75"
+                                        xyaxes="-1 0 0  0 0.7270 0.6870"/>
 
                                 <body name="hand" pos="0 0 0.1347">
                                     <inertial pos="0 0 0" mass="0.001" diaginertia="1e-6 1e-6 1e-6"/>
