@@ -7,6 +7,7 @@ import numpy.typing as npt
 from gymnasium.spaces import Box
 from scipy.spatial.transform import Rotation
 
+from metaworld import asset_path_utils
 from metaworld.asset_path_utils import full_V3_path_for
 from metaworld.sawyer_xyz_env import RenderMode, SawyerXYZEnv
 from metaworld.types import InitConfigDict
@@ -83,6 +84,10 @@ class SawyerDoorCloseEnvV3(SawyerXYZEnv):
         self._reset_hand()
         self.objHeight = self.data.geom("handle").xpos[2]
         obj_pos = self._get_state_rand_vec()
+        if asset_path_utils.ACTIVE_ARM == "yam":
+            # Shift the door forward (+y); this moves the open-door handle (the
+            # reachable target) out of YAM's near-base dead zone into reach.
+            obj_pos = obj_pos + np.array([0.0, 0.12, 0.0])
         self.obj_init_pos = obj_pos
         goal_pos = obj_pos.copy() + np.array([0.2, -0.2, 0.0])
         self._target_pos = goal_pos

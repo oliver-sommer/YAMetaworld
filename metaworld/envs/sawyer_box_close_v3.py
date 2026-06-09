@@ -7,6 +7,7 @@ import numpy as np
 import numpy.typing as npt
 from gymnasium.spaces import Box
 
+from metaworld import asset_path_utils
 from metaworld.asset_path_utils import full_V3_path_for
 from metaworld.sawyer_xyz_env import RenderMode, SawyerXYZEnv
 from metaworld.types import InitConfigDict
@@ -115,6 +116,11 @@ class SawyerBoxCloseEnvV3(SawyerXYZEnv):
             goal_pos = self._get_state_rand_vec()
         self.obj_init_pos = np.concatenate([goal_pos[:2], [self.obj_init_pos[-1]]])
         self._target_pos = goal_pos[-3:]
+
+        if asset_path_utils.ACTIVE_ARM == "yam":
+            # Shift the box forward (+y) into YAM's reachable zone; Sawyer places
+            # it near the base where YAM's shorter reach cannot descend onto it.
+            self.obj_init_pos = self.obj_init_pos + np.array([0.0, 0.10, 0.0])
 
         self.model.body("boxbody").pos = np.concatenate(
             [self._target_pos[:2], [box_height]]

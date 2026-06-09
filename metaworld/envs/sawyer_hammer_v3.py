@@ -6,6 +6,7 @@ import numpy as np
 import numpy.typing as npt
 from gymnasium.spaces import Box
 
+from metaworld import asset_path_utils
 from metaworld.asset_path_utils import full_V3_path_for
 from metaworld.sawyer_xyz_env import RenderMode, SawyerXYZEnv
 from metaworld.types import HammerInitConfigDict
@@ -116,6 +117,11 @@ class SawyerHammerEnvV3(SawyerXYZEnv):
 
         # Randomize hammer position
         self.hammer_init_pos = self._get_state_rand_vec()
+        if asset_path_utils.ACTIVE_ARM == "yam":
+            # YAM's reach envelope is shorter than Sawyer's and cannot reach the
+            # near-base low corner where Sawyer places the hammer.  Shift it
+            # forward (+y) into YAM's reachable zone.
+            self.hammer_init_pos = self.hammer_init_pos + np.array([0.0, 0.15, 0.0])
         self.nail_init_pos = self._get_site_pos("nailHead")
         self.obj_init_pos = self.hammer_init_pos.copy()
         self._set_hammer_xyz(self.hammer_init_pos)
