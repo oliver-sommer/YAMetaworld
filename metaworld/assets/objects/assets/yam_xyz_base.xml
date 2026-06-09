@@ -129,7 +129,7 @@
                                        view_dir = (0, -sin(30°), cos(30°)) = (0, -0.5000, 0.8660)
                                        x = (-1,0,0)  y = (0, 0.8660, 0.5000)  z = x×y = (0,0.5000,-0.8660)
                                      The -z axis (view direction) points 30° from the gripper axis. -->
-                                <camera name="wrist" mode="fixed" pos="0 0.08 0.05" fovy="75"
+                                <camera name="wrist" mode="fixed" pos="0 0.08 0.05" fovy="90"
                                         xyaxes="-1 0 0  0 0.8660 0.5000"/>
 
                                 <body name="hand" pos="0 0 0.1347">
