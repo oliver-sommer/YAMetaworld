@@ -67,7 +67,11 @@
             </default>
             <default class="yam_finger">
                 <joint type="slide" armature="0.1" frictionloss="0.1"/>
-                <position ctrlrange="0.0 0.041" kp="100" kv="10" inheritrange="0"/>
+                <!-- kp 2000: the fingers are force-driven (not kinematically
+                     anchored), so the position actuator must develop a multi-N
+                     pinch against a held object; kp=100 gave only ~0.5 N, far
+                     too weak to lift Meta-World's 0.75 kg objects by friction. -->
+                <position ctrlrange="0.0 0.041" kp="2000" kv="200" inheritrange="0"/>
             </default>
         </default>
     </default>

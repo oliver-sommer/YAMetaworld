@@ -111,7 +111,13 @@
                                 <geom class="yam_collision" size="0.030 0.005" pos="0 0.0 0.03" quat="1 0 0 1"/>
                                 <geom class="yam_collision" size="0.01 0.035" pos="0 -0.039 0.052" quat="1 0 1 0"/>
 
-                                <!-- IK TCP site (used by EEController) -->
+                                <!-- IK TCP site (used by EEController).  Sits on
+                                     the link_6 wrist (joint6 roll) axis.  The
+                                     finger assembly below is mounted so the pad
+                                     grasp midpoint coincides with this point, so
+                                     one on-axis TCP serves both grasping and
+                                     pushing and wrist roll spins the grasp in
+                                     place (no off-axis sweep). -->
                                 <site name="tcp_site" pos="0 0 0" quat="1 0 0 -1" size="0.005" rgba="1 0 0 1" group="4"/>
                                 <site name="grasp_site" pos="0 0 0.1347" quat="1 0 0 -1" size="0.005" rgba="0 1 0 1" group="4"/>
 
@@ -137,8 +143,10 @@
                                     <!--
                                         leftEndEffector / rightEndEffector placed here (in the hand
                                         body) so that tcp_center = (left+right)/2 exactly equals
-                                        the hand body position = grasp_site.  The ±0.01 x-offset is
-                                        cosmetic (MW only uses the midpoint for reward/success).
+                                        the hand body position = grasp_site = the physical pad
+                                        midpoint (the finger assembly is mounted on-axis below).
+                                        The ±0.01 x-offset is cosmetic (MW only uses the midpoint
+                                        for reward/success).
                                     -->
                                     <site name="leftEndEffector"  pos=" 0.01 0 0" size="0.01" rgba="0 1 0 1" group="4"/>
                                     <site name="rightEndEffector" pos="-0.01 0 0" size="0.01" rgba="1 0 0 1" group="4"/>
@@ -151,7 +159,7 @@
                                     kept so the equality constraint and EEController actuator lookup
                                     still resolve correctly.
                                 -->
-                                <body name="leftclaw" pos="-0.037 0.0392 0.0605" quat="1 0 1 0" gravcomp="1">
+                                <body name="leftclaw" pos="-0.037 0.0832 0.0647" quat="1 0 1 0" gravcomp="1">
                                     <inertial pos="-0.0192995 -0.0365902 0.039774"
                                               quat="0.757351 0.568898 -0.3199 0.0" mass="0.118"
                                               diaginertia="0.000159084 0.000154909 4.63655e-05"/>
@@ -196,7 +204,7 @@
                                     Right finger chain.  Named "rightclaw" for Meta-World
                                     compatibility.  Joint name "right_finger" kept for equality.
                                 -->
-                                <body name="rightclaw" pos="0.037 -0.0392 0.0605" quat="1 0 1 0" gravcomp="1">
+                                <body name="rightclaw" pos="0.037 0.0048 0.0647" quat="1 0 1 0" gravcomp="1">
                                     <inertial pos="-0.0192995 0.0365902 -0.039774"
                                               quat="-0.757351 0.568898 -0.3199 0" mass="0.118"
                                               diaginertia="0.000159084 0.000154909 4.63655e-05"/>
